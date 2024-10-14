@@ -1,2 +1,2 @@
 # ICT2217
-We see everything
+Gonna create the scripts individually then merge after
