@@ -3,22 +3,21 @@ import re
 from scapy.all import *
 from scapy.contrib.dtp import DTP, DTPNeighbor, DTPStatus, DTPType
 import time
+import subprocess
 
-# Validate MAC address input
-try:
-    mac = sys.argv[1]
-    if not re.match("^([0-9a-f]{2}[:-]){5}[0-9a-f]{2}$", mac.lower()):
-        print("MAC address must be in format: 00:11:22:33:44:55, exiting")
-        sys.exit(1)
-except IndexError:
-    print("You must enter Kali's MAC address, e.g. 00:11:22:33:44:55 as argument")
-    sys.exit(1)
+# Function to get the MAC address of an interface
+def get_mac_address(interface):
+    return open(f'/sys/class/net/{interface}/address').read().strip()
 
-# Interface names
+# Interface names (eth0 for Switch 1, eth1 for Switch 2)
 interfaces = ["eth0", "eth1"]
 
 # Function to craft and send DTP packet
-def send_dtp_packet(interface, mac):
+def send_dtp_packet(interface):
+    # Get the MAC address of the interface
+    mac = get_mac_address(interface)
+    print(f"Using MAC address {mac} for interface {interface}")
+    
     # Capture one DTP packet from the neighbor switch on the specified interface
     pkt = sniff(iface=interface, count=1, filter="ether dst 01:00:0c:cc:cc:cc")[0]
     
@@ -45,4 +44,4 @@ def send_dtp_packet(interface, mac):
 
 # Send DTP packets to both switches (via eth0 and eth1)
 for interface in interfaces:
-    send_dtp_packet(interface, mac)
+    send_dtp_packet(interface)
